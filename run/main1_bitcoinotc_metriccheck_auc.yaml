@@ -1,0 +1,99 @@
+remark: main1_bitcoinotc
+out_dir: results
+device: cuda
+
+experimental:
+  rank_eval_multiplier: 100
+
+meta:
+  is_meta: true
+  method: moving_average
+  alpha: 0.7
+
+dataset:
+  # 关键：直接写 bitcoin，避免 infer 分支把频率改成 W
+  format: bitcoin
+  name: bitcoinotc.csv
+  dir: /home/ly/SDNL/roland_public_data
+  premade_datasets: fresh
+
+  task: link_pred
+  task_type: classification
+  transductive: true
+  # 时序快照按时间构建，监督边在每个时间步内再划分
+  split_method: sdnl_live_update
+  split: [0.8, 0.1, 0.1]
+  shuffle: false
+  negative_sample_weight: uniform
+
+  augment_feature: []
+  augment_feature_dims: [0]
+  augment_feature_repr: position
+  augment_label: ""
+  augment_label_dims: 0
+  transform: none
+
+  edge_encoder: true
+  # Bitcoin loader里是 rating + time，共2维，符合 weighted
+  edge_dim: 2
+  edge_encoder_name: roland_general
+  edge_encoder_bn: true
+
+  node_encoder: false
+  node_encoder_name: roland
+  node_encoder_bn: true
+
+transaction:
+  snapshot: true
+  # 图中是 1 month
+  snapshot_freq: M
+  check_snapshot: false
+  history: rolling
+  horizon: 1
+  pred_mode: at
+  loss: supervised
+  keep_ratio: sigmoid_keep_ratio
+
+  feature_int_dim: 16
+  feature_edge_int_num: []
+  feature_node_int_num: [0]
+  feature_amount_dim: 16
+  feature_time_dim: 16
+
+train:
+  mode: live_update
+  batch_size: 32
+  eval_period: 20
+  ckpt_period: 400
+  internal_validation_tolerance: 5
+  stop_live_update_after: 99999999
+
+model:
+  # 用已存在模型名；不要用 gnn_recurrent_loss
+  type: gnn_recurrent_att
+  loss_fun: cross_entropy
+  edge_decoding: concat
+  graph_pooling: add
+
+gnn:
+  embed_update_method: moving_average_gru
+  layers_pre_mp: 1
+  layers_mp: 1
+  layers_post_mp: 2
+  dim_inner: 64
+  layer_type: residual_edge_conv
+  msg_direction: single
+  skip_connection: affine
+  stage_type: stack
+  batchnorm: true
+  act: prelu
+  dropout: 0.0
+  agg: add
+  att_heads: 8
+  normalize_adj: false
+
+optim:
+  optimizer: adam
+  scheduler: step
+  base_lr: 0.01
+  max_epoch: 100

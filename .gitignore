@@ -1,0 +1,46 @@
+# Python / 编辑器
+__pycache__/
+*.py[cod]
+*.egg-info/
+.idea/
+.vscode/
+.ipynb_checkpoints/
+
+# 凭据和本机设置
+.env
+.env.*
+!.env.example
+.aws/
+.ssh/
+.codex/
+*.pem
+*.key
+
+# 环境、安装包、备份
+/env/
+/wheel/
+*.whl
+*.tar.gz
+*.bak*
+
+# 原始数据和生成的静态网络（单独同步）
+/roland_public_data/
+/roland_raw_records/
+/Bitcoinalpha_T/
+/Bitcoinotc_T/
+/CollegeMsg_T/
+/MT_friend/
+/RE_friend/
+/RT_friend/
+/static_feature/
+
+# 训练输出
+results/
+result/
+runs_*/
+logs/
+*.log
+*.xlsx
+*.pt
+*.pth
+*.ckpt
